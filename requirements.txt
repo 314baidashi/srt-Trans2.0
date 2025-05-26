@@ -1,0 +1,4 @@
+srt==3.5.3
+tkinterdnd2==0.3.0
+requests==2.31.0
+ollama==0.1.6 
