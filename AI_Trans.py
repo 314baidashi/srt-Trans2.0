@@ -293,12 +293,19 @@ class SRTTranslatorApp:
             self.use_translate_model.set(False)
             self.enable_controls()
 
-    def translate_with_ollama(self, text, src_lang, dest_lang):
-        """使用Ollama进行翻译"""
-        if self.use_translate_model.get():
-            return self.translate_with_special_model(text, src_lang, dest_lang)
-        else:
-            return self.translate_with_general_model(text, src_lang, dest_lang)
+    def translate_with_ollama(self, text, src_lang, dest_lang, max_retries=3):
+        """使用Ollama进行翻译，添加重试机制"""
+        for attempt in range(max_retries):
+            try:
+                if self.use_translate_model.get():
+                    return self.translate_with_special_model(text, src_lang, dest_lang)
+                else:
+                    return self.translate_with_general_model(text, src_lang, dest_lang)
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    time.sleep(1)  # 等待1秒后重试
+                    continue
+                raise Exception(f"翻译失败（已重试{attempt + 1}次）: {str(e)}")
 
     def translate_with_special_model(self, text, src_lang, dest_lang):
         """使用专用翻译模型进行翻译"""
@@ -348,8 +355,11 @@ Translate {from_lang} to {to_lang}.
             src_lang = self.src_lang.get()
             dest_lang = self.dest_lang.get()
             subs = self.parse_srt(self.input_file)
+            total_subs = len(subs)
+            # 设置进度条最大值
+            self.progress_bar["maximum"] = total_subs
             self.message_queue.put({"type": "progress", "value": 0})
-            self.message_queue.put({"type": "status", "text": "正在翻译..."})
+            self.message_queue.put({"type": "status", "text": f"正在翻译... (0/{total_subs})"})
             
             translated_subs = []
             for i, sub in enumerate(subs):
@@ -362,23 +372,52 @@ Translate {from_lang} to {to_lang}.
                         "type": "complete"
                     })
                     return
+                
+                try:
+                    original_start = sub.start
+                    original_end = sub.end
+                    translated_text = self.translate_with_ollama(sub.content, src_lang, dest_lang)
                     
-                original_start = sub.start
-                original_end = sub.end
-                translated_text = self.translate_with_ollama(sub.content, src_lang, dest_lang)
-                new_index = sub.index if len(translated_subs) == 0 else len(translated_subs) + 1
-                translated_sub = srt.Subtitle(
-                    new_index,
-                    original_start,
-                    original_end,
-                    translated_text
-                )
-                translated_subs.append(translated_sub)
-                self.message_queue.put({"type": "progress", "value": i + 1})
-                self.message_queue.put({
-                    "type": "preview",
-                    "text": f"原文: {sub.content}\n译文: {translated_text}\n\n"
-                })
+                    # 检查翻译结果是否为空
+                    if not translated_text or translated_text.strip() == "":
+                        raise Exception("翻译结果为空")
+                    
+                    new_index = sub.index if len(translated_subs) == 0 else len(translated_subs) + 1
+                    translated_sub = srt.Subtitle(
+                        new_index,
+                        original_start,
+                        original_end,
+                        translated_text
+                    )
+                    translated_subs.append(translated_sub)
+                    
+                    # 更新进度条和状态
+                    progress = i + 1
+                    self.message_queue.put({"type": "progress", "value": progress})
+                    self.message_queue.put({
+                        "type": "status",
+                        "text": f"正在翻译... ({progress}/{total_subs})"
+                    })
+                    self.message_queue.put({
+                        "type": "preview",
+                        "text": f"原文: {sub.content}\n译文: {translated_text}\n\n"
+                    })
+                    
+                except Exception as e:
+                    error_msg = f"翻译第{progress}条字幕时出错: {str(e)}"
+                    self.message_queue.put({
+                        "type": "preview",
+                        "text": f"错误: {error_msg}\n\n"
+                    })
+                    # 如果出错，使用原文作为翻译结果
+                    translated_sub = srt.Subtitle(
+                        sub.index,
+                        sub.start,
+                        sub.end,
+                        sub.content
+                    )
+                    translated_subs.append(translated_sub)
+                    continue
             
             if not self.stop_translation:
                 self.write_srt(translated_subs, self.input_file)
