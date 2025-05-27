@@ -6,7 +6,7 @@
 
 ## 版本选择建议
 
-- 1.0版本：适合所有用户，无需安装额外软件，开箱即用（157MB）[点击此处下载最新版exe安装包](https://download.csdn.net/download/weixin_45826970/90912987)
+- [1.0版本](https://github.com/314baidashi/SRT-translation)：适合所有用户，无需安装额外软件，开箱即用（157MB）[点击此处下载最新版exe安装包](https://download.csdn.net/download/weixin_45826970/90912987)
 - 2.0版本：需要安装Ollama，适合有经验的用户，支持更多语言和更好的翻译效果（17MB）[点击下载本地AI版](https://github.com/314baidashi/srt-Trans2.0/raw/refs/heads/main/SRT%E5%AD%97%E5%B9%95%E7%BF%BB%E8%AF%91%E5%B7%A5%E5%85%B72.0%EF%BC%88ollama_AI%E7%89%88%EF%BC%89.exe)
 
 ## 测试中发现的bug
