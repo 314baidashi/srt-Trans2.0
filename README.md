@@ -9,6 +9,11 @@
 - [1.0版本](https://github.com/314baidashi/SRT-translation)：适合所有用户，无需安装额外软件，开箱即用（157MB）[点击此处下载最新版exe安装包](https://download.csdn.net/download/weixin_45826970/90912987)
 - 2.0版本：需要安装Ollama，适合有经验的用户，支持更多语言和更好的翻译效果（17MB）[点击下载本地AI版](https://github.com/314baidashi/srt-Trans2.0/raw/refs/heads/main/SRT%E5%AD%97%E5%B9%95%E7%BF%BB%E8%AF%91%E5%B7%A5%E5%85%B72.0%EF%BC%88ollama_AI%E7%89%88%EF%BC%89.exe)
 
+为了帮大家节省时间，我帮大家把需要魔法下载的生成有声字幕引擎和英文base模型打包到下方，可以一起下载（两个文件分别对应PotPlayer根目录的两个同名文件夹，直接拖入替换即可，注意我的引擎基于英伟达显卡，如果你的电脑不是请自己找其他版本）
+
+[CUDA版引擎百度云](https://pan.baidu.com/s/1tiQN_B3AnomAAp_Efv18DA?pwd=wr3b)
+[识别模型HuggingFace下载](https://huggingface.co/ggerganov/whisper.cpp/tree/main)
+[识别模型魔塔社区下载](https://modelscope.cn/models/timeless/whispercpp/files?version=master)
 ## 更新历史（请到/Releases中寻找各个版本）
 - 2.1 修复进度条不准确问题，修复过长文本会到570条左右卡住的问题。
 - 2.0 不再使用自带小模型翻译，转而连接本地模型，体积直接精简到最小17MB，模型无上限，速度更快，质量更强。
